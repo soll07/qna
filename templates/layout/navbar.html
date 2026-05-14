@@ -1,0 +1,52 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'qna:index' %}">🇶 🇳 🇦</a>
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'qna:index' %}">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">About</a>
+            </li>
+            </ul>
+
+            <ul class="navbar-nav mb-2 mb-lg-0">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                    <!-- <a class="nav-link" href="#">{{ user.username }}</a> -->
+                    <a class="nav-link" href="#" title="{{ user.username }}">
+                        {% if user.userdetail.profile %}
+                            <img src="{{ user.userdetail.profile.url }}" alt="" width="28" class="rounded-circle">
+                        {% else %}
+                            <img src="/media/profiles/default.png" alt="" width="28" class="rounded-circle">
+                        {% endif %}
+                    </a>
+                    </li>
+                    <li>
+                        <form action="{% url 'uauth:logout' %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link btn btn-link">로그아웃</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                    <a class="nav-link" href="{% url 'uauth:login' %}">로그인</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="{% url 'uauth:signup' %}">회원가입</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

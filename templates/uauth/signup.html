@@ -1,0 +1,141 @@
+{% extends "../layout/base.html" %}
+
+{% block style %}
+<style>
+    .feedback {
+        font-weight: bold;
+    }
+
+    .error {
+        color: red;
+    }
+
+    .success {
+        color: green;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="container my-3">
+  <h5 class="my-3 border-bottom pb-2">회원가입</h5>
+  {% include "../layout/form_errors.html" %}
+  <form method="post" action="" name="userCreateFrm" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="mb-3">
+          <label for="username">사용자 이름</label>
+          <input type="text" class="form-control" name="username" id="username" value="{{ form.username.value | default_if_none:'' }}">
+          <sub id="username-feedback" class="feedback"></sub>
+
+          <!-- 현재 작성된 아이디가 회원가입 가능상태인지 상태를 저장 --->
+          <input type="hidden" id="id-valid" value="0">
+      </div>
+      <div class="mb-3">
+          <label for="password1">비밀번호</label>
+          <input type="password" class="form-control" name="password1" id="password1" value="{{ form.password1.value | default_if_none:'' }}">
+      </div>
+      <div class="mb-3">
+          <label for="password2">비밀번호 확인</label>
+          <input type="password" class="form-control" name="password2" id="password2" value="{{ form.password2.value | default_if_none:'' }}">
+      </div>
+      <div class="mb-3">
+          <label for="email">이메일</label>
+          <input type="text" class="form-control" name="email" id="email" value="{{ form.email.value | default_if_none:'' }}">
+      </div>
+      <div class="mb-3">
+          <label for="birthday">생일</label>
+          <input type="date" class="form-control" name="birthday" id="birthday" value="{{ form.birthday.value | default_if_none:'' }}">
+      </div>
+      <div class="mb-3">
+          <label for="profile" class="form-label">프로필</label>
+          <input class="form-control" type="file" id="profile" name="profile">
+      </div>
+      <button type="submit" class="btn btn-primary">회원가입하기</button>
+  </form>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    const $username =  document.querySelector("input[name='username']")
+    const $feedBack = document.querySelector("sub#username-feedback")
+
+    const $userCreateFrm = document.querySelector("form[name='userCreateFrm']")
+    const $idValid = document.querySelector("#id-valid")
+
+    // input: input 태그의 value, 즉 사용자의 입력값이 달라질 때마다 매번
+    // change: input 태그의 value가 바뀌고 blur(다른 곳을 클릭해서 focus가 사라지면)가 발생한 시점
+    $username.addEventListener('input', async(e) => {
+
+        console.log('이벤트 객체:', e);
+        console.log('이벤트가 발생한 요소:', e.target);
+        console.log('이벤트가 발생한 요소인 input 태그의 값:', e.target.value);
+        console.log('이벤트가 발생한 요소인 input 태그의 값:', $username.value);
+
+
+        // feedBack 태그 초기화
+        $feedBack.classList.remove('error', 'success');
+        // $feedBack.textContent = '';
+
+        const value = $username.value.trim();  // 양 옆 공백 제거
+
+        // 4자 미만이면 속성 수정/메세지 작성 및 submit 방지까지 고려
+        if (value.length < 4) {
+            $feedBack.classList.add('error');
+            $feedBack.textContent = '아이디는 4글자 이상이어야 합니다.';
+            $idValid.value = '0';
+            return;
+        }
+
+        // 아이디 중복체크 비동기 요청
+        const response = await fetch("{% url 'uauth:check_username' %}?username=" + value);
+        const data = await response.json();
+        console.log(data);
+
+        const {available, message} = data;
+
+        $feedBack.textContent = message;
+        if(available) {
+            $feedBack.classList.add('success')
+            $idValid.value = '1';
+        } else {
+            $feedBack.classList.add('error')
+            $idValid.value = '0';
+        }
+    });
+
+    $userCreateFrm.onsubmit = () => {
+        console.log('현재 동작하는지와 idValid값 확인: ', $idValid.value)
+        if($idValid.value != '1') {
+            alert('유효한 아이디를 입력해 주세요.');
+            return false;
+        }
+    }
+
+    /*
+        <태그 직접 만들 떄>
+        (구조가 복잡하면 innerHTML이 편하긴 한데, 
+        사용자 입력값을 그대로 넣으면 XSS 위험이 있어서 
+        Django Ajax 응답 데이터를 렌더링할 때는 
+        createElement + textContent 조합이 안전)
+
+        요소 노드
+        const div = document.createElement('div')
+
+        텍스트 노드
+        div.textContent = '안녕'
+
+        속성 노드
+        div.className = 'my-class'
+        div.id = 'my-id'
+
+        // 속성은 setAttribute도 가능
+        div.setAttribute('data-id', '123')
+
+        // DOM에 추가
+        document.body.appendChild(div)
+        // 또는 특정 요소 안에
+        document.getElementById('container').appendChild(div)
+    */
+</script>
+{% endblock script %}

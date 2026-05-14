@@ -1,0 +1,35 @@
+{% extends "../layout/base.html" %}
+
+{% block content %}
+{% comment %}
+{{ form }}           <!-- Django에서 폼이 자체적으로 만드는 HTML -->
+{{ form|pprint }}
+{% endcomment %}
+<div class="container">
+  <h5 class="my-3 border-bottom pb-2">질문등록</h5>
+
+  {% include '../layout/form_errors.html' %}
+
+  <form name="questionCreateFrm" method="post"> <!-- action 속성을 안적으면 현재 경로 그대로 -->
+      {% csrf_token %}
+      <div class="mb-3">
+          <label for="subject" class="form-label">{{ form.subject.label }}</label>
+          <input 
+              type="text" 
+              class="form-control" 
+              name="subject" 
+              id="subject" 
+              value="{{ form.subject.value | default_if_none:'' }}">
+      </div>
+      <div class="mb-3">
+          <label for="content" class="form-label">{{ form.content.label }}</label>
+          <textarea 
+              class="form-control" 
+              name="content"  
+              id="content" 
+              rows="10">{{ form.content.value | default_if_none:'' }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">저장하기</button>
+  </form>
+</div>
+{% endblock content %}

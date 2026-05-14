@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-w=0hdmut4)kg(gh@=g9esvcn@a=u0!82dd+@-^+w&^9dlra9q6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['zero4-qna-wsgi.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
 
 
 # Application definition
